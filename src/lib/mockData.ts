@@ -1,121 +1,203 @@
 import { Task, Sprint, ProjectMetrics, AIInsight } from "@/types";
-import { projectTasks, projectSprints } from "./dataLoader";
 
-// Use the actual project data from Excel
-export const mockTasks: Task[] = projectTasks;
+export const mockTasks: Task[] = [
+  {
+    id: "1",
+    title: "Implement user authentication",
+    description: "Set up OAuth and JWT authentication",
+    status: "done",
+    priority: "high",
+    assignee: "Alice Johnson",
+    dueDate: "2025-01-10",
+    progress: 100,
+    estimatedHours: 16,
+    actualHours: 14,
+    tags: ["backend", "security"],
+  },
+  {
+    id: "2",
+    title: "Design dashboard UI mockups",
+    description: "Create Figma mockups for main dashboard",
+    status: "done",
+    priority: "medium",
+    assignee: "Bob Smith",
+    dueDate: "2025-01-12",
+    progress: 100,
+    estimatedHours: 12,
+    actualHours: 13,
+    tags: ["design", "frontend"],
+  },
+  {
+    id: "3",
+    title: "Set up CI/CD pipeline",
+    description: "Configure automated deployment",
+    status: "in_progress",
+    priority: "high",
+    assignee: "Charlie Davis",
+    dueDate: "2025-01-15",
+    progress: 65,
+    estimatedHours: 20,
+    actualHours: 15,
+    tags: ["devops", "infrastructure"],
+  },
+  {
+    id: "4",
+    title: "Integrate payment gateway",
+    description: "Add Stripe integration",
+    status: "delayed",
+    priority: "critical",
+    assignee: "Diana Lee",
+    dueDate: "2025-01-13",
+    progress: 40,
+    dependencies: ["1"],
+    delayReason: "Waiting for API credentials from client",
+    estimatedHours: 24,
+    actualHours: 18,
+    tags: ["backend", "payments"],
+  },
+  {
+    id: "5",
+    title: "Write API documentation",
+    description: "Document all REST endpoints",
+    status: "in_progress",
+    priority: "medium",
+    assignee: "Eve Wilson",
+    dueDate: "2025-01-16",
+    progress: 55,
+    estimatedHours: 10,
+    actualHours: 6,
+    tags: ["documentation"],
+  },
+  {
+    id: "6",
+    title: "Implement data analytics module",
+    description: "Build analytics dashboard with charts",
+    status: "not_started",
+    priority: "low",
+    assignee: "Frank Miller",
+    dueDate: "2025-01-20",
+    progress: 0,
+    dependencies: ["3"],
+    estimatedHours: 30,
+    actualHours: 0,
+    tags: ["frontend", "analytics"],
+  },
+  {
+    id: "7",
+    title: "Database optimization",
+    description: "Optimize query performance and add indexes",
+    status: "delayed",
+    priority: "high",
+    assignee: "Grace Taylor",
+    dueDate: "2025-01-14",
+    progress: 30,
+    delayReason: "Complex indexing strategy requires more research",
+    estimatedHours: 18,
+    actualHours: 12,
+    tags: ["database", "backend"],
+  },
+  {
+    id: "8",
+    title: "Mobile responsive design",
+    description: "Make dashboard mobile-friendly",
+    status: "not_started",
+    priority: "medium",
+    assignee: "Henry Brown",
+    dueDate: "2025-01-18",
+    progress: 0,
+    dependencies: ["2"],
+    estimatedHours: 16,
+    actualHours: 0,
+    tags: ["frontend", "mobile"],
+  },
+];
 
-export const mockSprints: Sprint[] = projectSprints;
-
-// Calculate metrics from actual data
-const completedTasks = mockTasks.filter((t) => t.status === "done").length;
-const delayedTasks = mockTasks.filter((t) => t.status === "delayed").length;
-const avgVelocity = mockSprints.reduce((sum, s) => sum + s.velocity, 0) / mockSprints.length;
-const onTimeRate = ((completedTasks / mockTasks.length) * 100);
-const aiScore = Math.max(1, Math.min(10, 10 - (delayedTasks * 1.5)));
+export const mockSprints: Sprint[] = [
+  {
+    id: "sprint-1",
+    name: "Sprint 1",
+    startDate: "2025-01-01",
+    endDate: "2025-01-07",
+    velocity: 85,
+    tasks: mockTasks.slice(0, 2),
+  },
+  {
+    id: "sprint-2",
+    name: "Sprint 2",
+    startDate: "2025-01-08",
+    endDate: "2025-01-14",
+    velocity: 72,
+    tasks: mockTasks.slice(2, 5),
+  },
+  {
+    id: "sprint-3",
+    name: "Sprint 3 (Current)",
+    startDate: "2025-01-15",
+    endDate: "2025-01-21",
+    velocity: 68,
+    tasks: mockTasks.slice(5),
+  },
+];
 
 export const mockMetrics: ProjectMetrics = {
   totalTasks: mockTasks.length,
-  completedTasks,
-  delayedTasks,
-  averageVelocity: Math.round(avgVelocity),
-  onTimeDelivery: Math.round(onTimeRate),
-  aiDeliveryScore: Math.round(aiScore * 10) / 10,
+  completedTasks: mockTasks.filter((t) => t.status === "done").length,
+  delayedTasks: mockTasks.filter((t) => t.status === "delayed").length,
+  averageVelocity: 75,
+  onTimeDelivery: 68,
+  aiDeliveryScore: 7.3,
 };
 
-// Generate AI insights based on actual data
-const delayedTasksList = mockTasks.filter(t => t.status === 'delayed');
-const generateInsights = (): AIInsight[] => {
-  const insights: AIInsight[] = [];
-  
-  // Root cause analysis for delayed tasks
-  delayedTasksList.forEach((task, idx) => {
-    if (task.delayReason) {
-      insights.push({
-        id: `insight-delay-${idx}`,
-        type: 'root_cause',
-        title: `${task.title} Delay Analysis`,
-        description: task.delayReason,
-        impact: task.priority === 'critical' ? 'high' : 'medium',
-        recommendation: task.actualHours > task.estimatedHours 
-          ? `Re-estimate similar tasks with ${Math.round((task.actualHours - task.estimatedHours) / task.estimatedHours * 100)}% buffer to improve accuracy`
-          : 'Review task breakdown and identify blockers early in sprint planning',
-        timestamp: new Date().toISOString(),
-      });
-    }
-  });
-  
-  // Prediction for in-progress tasks
-  const inProgressTasks = mockTasks.filter(t => t.status === 'in_progress' && t.progress < 50);
-  if (inProgressTasks.length > 0) {
-    insights.push({
-      id: 'insight-prediction',
-      type: 'prediction',
-      title: 'At-Risk Tasks Detected',
-      description: `${inProgressTasks.length} in-progress tasks showing slow velocity`,
-      impact: 'medium',
-      recommendation: 'Daily check-ins recommended for low-velocity tasks to identify blockers early',
-      timestamp: new Date().toISOString(),
-    });
-  }
-  
-  // Fast-track opportunities
-  const completedEarly = mockTasks.filter(t => t.status === 'done' && t.actualHours < t.estimatedHours);
-  if (completedEarly.length > 0) {
-    insights.push({
-      id: 'insight-fast-track',
-      type: 'fast_track',
-      title: 'Efficiency Gains Identified',
-      description: `${completedEarly.length} tasks completed under estimate`,
-      impact: 'low',
-      recommendation: 'Document successful patterns from early completions to replicate efficiency',
-      timestamp: new Date().toISOString(),
-    });
-  }
-  
-  // Resource allocation
-  const owners = [...new Set(mockTasks.map(t => t.assignee))];
-  const ownerLoad = owners.map(owner => ({
-    owner,
-    tasks: mockTasks.filter(t => t.assignee === owner && t.status !== 'done').length
-  }));
-  const maxLoad = Math.max(...ownerLoad.map(o => o.tasks));
-  const minLoad = Math.min(...ownerLoad.map(o => o.tasks));
-  
-  if (maxLoad - minLoad >= 2) {
-    insights.push({
-      id: 'insight-resource',
-      type: 'resource_shift',
-      title: 'Workload Imbalance Detected',
-      description: `Uneven task distribution across team members`,
-      impact: 'medium',
-      recommendation: `Consider redistributing tasks from high-load to low-load team members to optimize delivery`,
-      timestamp: new Date().toISOString(),
-    });
-  }
-  
-  return insights;
-};
+export const mockInsights: AIInsight[] = [
+  {
+    id: "insight-1",
+    type: "root_cause",
+    title: "Payment Gateway Delay Root Cause",
+    description: "Task delayed due to external dependency on client API credentials",
+    impact: "high",
+    recommendation: "Set up a staging environment with test credentials to unblock development while waiting for production keys",
+    timestamp: "2025-01-11T10:30:00Z",
+  },
+  {
+    id: "insight-2",
+    type: "prediction",
+    title: "Database Optimization Risk",
+    description: "Current progress rate suggests 3-day slip on database optimization task",
+    impact: "medium",
+    recommendation: "Allocate additional senior developer for pair programming session to accelerate research phase",
+    timestamp: "2025-01-11T09:15:00Z",
+  },
+  {
+    id: "insight-3",
+    type: "fast_track",
+    title: "Fast-Track API Documentation",
+    description: "API documentation can be automated using existing OpenAPI specs",
+    impact: "medium",
+    recommendation: "Use Swagger codegen to auto-generate 70% of documentation, reducing manual effort by 7 hours",
+    timestamp: "2025-01-11T08:00:00Z",
+  },
+  {
+    id: "insight-4",
+    type: "resource_shift",
+    title: "Resource Reallocation Opportunity",
+    description: "Bob Smith (designer) has bandwidth after completing mockups early",
+    impact: "low",
+    recommendation: "Reassign Bob to mobile responsive design to start early and reduce critical path",
+    timestamp: "2025-01-10T16:45:00Z",
+  },
+];
 
-export const mockInsights: AIInsight[] = generateInsights();
-
-// Generate velocity data from actual sprints
-export const velocityData = mockSprints.map(sprint => ({
-  sprint: sprint.name,
-  velocity: sprint.velocity,
-  target: 75, // target velocity
-}));
-
-// Calculate status distribution from actual data
-const statusCounts = {
-  done: mockTasks.filter(t => t.status === 'done').length,
-  inProgress: mockTasks.filter(t => t.status === 'in_progress').length,
-  delayed: mockTasks.filter(t => t.status === 'delayed').length,
-  notStarted: mockTasks.filter(t => t.status === 'not_started').length,
-};
+export const velocityData = [
+  { sprint: "Sprint 1", velocity: 85, target: 80 },
+  { sprint: "Sprint 2", velocity: 72, target: 80 },
+  { sprint: "Sprint 3", velocity: 68, target: 80 },
+  { sprint: "Sprint 4", velocity: 75, target: 80 },
+  { sprint: "Sprint 5", velocity: 82, target: 80 },
+];
 
 export const statusDistribution = [
-  { name: "Done", value: statusCounts.done, color: "hsl(var(--success))" },
-  { name: "In Progress", value: statusCounts.inProgress, color: "hsl(var(--primary))" },
-  { name: "Delayed", value: statusCounts.delayed, color: "hsl(var(--destructive))" },
-  { name: "Not Started", value: statusCounts.notStarted, color: "hsl(var(--muted))" },
+  { name: "Done", value: 2, color: "hsl(var(--success))" },
+  { name: "In Progress", value: 2, color: "hsl(var(--primary))" },
+  { name: "Delayed", value: 2, color: "hsl(var(--destructive))" },
+  { name: "Not Started", value: 2, color: "hsl(var(--muted))" },
 ];
